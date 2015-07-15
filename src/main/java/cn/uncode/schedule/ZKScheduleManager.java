@@ -11,6 +11,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import cn.uncode.schedule.filter.Filter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,14 @@ public class ZKScheduleManager extends ThreadPoolTaskScheduler implements Applic
 	private ApplicationContext applicationcontext;
 	
 	private Map<String, Boolean> isOwnerMap = new ConcurrentHashMap<String, Boolean>();
+	/**
+	 * 任务拦截
+	 */
+	private Filter filter;
+
+	public void setFilter(Filter filter) {
+		this.filter = filter;
+	}
 
 	private Timer hearBeatTimer;
 	protected Lock initLock = new ReentrantLock();
@@ -231,6 +240,9 @@ public class ZKScheduleManager extends ThreadPoolTaskScheduler implements Applic
 	private Runnable taskWrapper(final Runnable task){
 		return new Runnable(){
 			public void run(){
+				if(filter != null && !filter.execute(zkManager)){
+					return;
+				}
 				ScheduledMethodRunnable scheduledMethodRunnable = (ScheduledMethodRunnable)task;
 		    	Method targetMethod = scheduledMethodRunnable.getMethod();
 		    	String[] beanNames = applicationcontext.getBeanNamesForType(targetMethod.getDeclaringClass());
