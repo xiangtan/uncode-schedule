@@ -50,8 +50,10 @@ public class ScheduleDataManager4ZK implements IScheduleDataManager {
 	
     public ScheduleDataManager4ZK(ZKManager aZkManager) throws Exception {
     	this.zkManager = aZkManager;
+		String project = System.getProperty("user.dir");
+		String name = project.substring(project.lastIndexOf("/")+1,project.length());
     	gson = new GsonBuilder().registerTypeAdapter(Timestamp.class,new TimestampTypeAdapter()).setDateFormat("yyyy-MM-dd HH:mm:ss").create();
-		this.pathServer = this.zkManager.getRootPath() +"/" + NODE_SERVER;
+		this.pathServer = this.zkManager.getRootPath() +"/" + NODE_SERVER+"/"+name;
 		this.pathTask = this.zkManager.getRootPath() +"/" + NODE_TASK;
 		this.random = new Random();
 		if (this.getZooKeeper().exists(this.pathServer, false) == null) {
